@@ -32,6 +32,24 @@ function Data(props) {
   );
 }
 
+function update(section, value) {
+  return new Promise((resol, rej) => {
+    let url = `/update/${section}/${value}`;
+    superagent.get(url).end((err, res) => {
+      err ? rej(null) : resol(res.body);
+    });
+  });
+}
+
+function read() {
+  return new Promise((resol, rej) => {
+    let url = "/data";
+    superagent.get(url).end((err, res) => {
+      err ? rej(null) : resol(res.body);
+    });
+  });
+}
+
 function App() {
   const [data, setData] = React.useState({
     header: 0,
@@ -41,11 +59,14 @@ function App() {
     footer: 0,
   });
 
+  React.useEffect(() => {
+    const response = read().then((res) => setData(res));
+  }, []);
+
   function handle(section) {
-    console.log("Pong", section);
-    const value = data[section.name] + section.value;
-    const object = { [section.name]: value };
-    setData({ ...data, ...object });
+    const response = update(section.name, section.value).then((res) =>
+      setData(res)
+    );
   }
 
   return (
